@@ -93,7 +93,16 @@ button:hover {
 <div class="main">
  <div class="main">
     <input id="gameId" placeholder="Enter Game ID">
-    <input id="secret" placeholder="Enter Secret Code">
+    <div class="mb-3">
+        <input
+            type="password"
+            class="form-control"
+            name="password"
+            id="secret"
+            placeholder="Enter Secret Code"
+        />
+    </div>
+    
     <button onclick="downloadZip()">Download Manifest</button>
     <p id="msg"></p>
     <hr style="margin: 15px 0; border-color: #3a536e;">
