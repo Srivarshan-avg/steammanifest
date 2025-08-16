@@ -78,9 +78,14 @@ button:disabled { background: #3a536e; cursor: not-allowed; }
 
 <div class="main">
     <input id="gameId" placeholder="Enter Game ID">
-    <button id="sendOtpBtn">Send OTP(Kindly don't spam !)</button>
+
+    <input type="password" id="secretInput" placeholder="Enter Secret Code">
+    <button id="checkSecretBtn">Verify Secret(Only for admin !! :>)</button>
+
+    <button id="sendOtpBtn" style="margin-top:10px;">Send OTP(Kindly don't spam !! :>)</button>
     <input type="text" id="otpInput" placeholder="Enter OTP" style="display:none; margin-top:10px;">
-    <button id="verifyBtn" disabled>Verify OTP</button>
+    <button id="verifyOtpBtn" disabled>Verify OTP</button>
+
     <button id="downloadBtn" disabled style="margin-top:15px;">Download Manifest</button>
     <div id="status"></div>
 </div>
@@ -90,12 +95,14 @@ button:disabled { background: #3a536e; cursor: not-allowed; }
 const serviceId = "service_54hbpa8";
 const templateId = "template_bzp179m";
 const publicKey = "FXF36RH6p-sv69X-G";
+const secretCode = "sageisdamcute"; // your access secret
 
 emailjs.init(publicKey);
 
 let currentOtp = null;
-const OTP_VALID_MINUTES = 10;
 let otpExpiry = null;
+let accessGranted = false;
+const OTP_VALID_MINUTES = 10;
 
 function generateOtp() {
     currentOtp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -103,22 +110,33 @@ function generateOtp() {
     return currentOtp;
 }
 
+document.getElementById('checkSecretBtn').addEventListener('click', () => {
+    const entered = document.getElementById('secretInput').value.trim();
+    if (entered === secretCode) {
+        document.getElementById('status').textContent = "Secret verified. You can download now.";
+        document.getElementById('status').className = "success";
+        document.getElementById('downloadBtn').disabled = false;
+        accessGranted = true;
+    } else {
+        document.getElementById('status').textContent = "Invalid secret code";
+        document.getElementById('status').className = "error";
+    }
+});
+
 document.getElementById('sendOtpBtn').addEventListener('click', () => {
     const gameId = document.getElementById('gameId').value.trim();
     if (!gameId) {
         alert("Enter Game ID first!");
         return;
     }
-
     const otp = generateOtp();
-    const templateParams = {passcode: otp };
-
+    const templateParams = { to_email: "your_email@gmail.com", passcode: otp };
     emailjs.send(serviceId, templateId, templateParams)
         .then(() => {
             document.getElementById('status').textContent = "OTP sent!";
             document.getElementById('status').className = 'success';
             document.getElementById('otpInput').style.display = "block";
-            document.getElementById('verifyBtn').disabled = false;
+            document.getElementById('verifyOtpBtn').disabled = false;
             alert("OTP has been sent.");
         })
         .catch(err => {
@@ -127,7 +145,7 @@ document.getElementById('sendOtpBtn').addEventListener('click', () => {
         });
 });
 
-document.getElementById('verifyBtn').addEventListener('click', () => {
+document.getElementById('verifyOtpBtn').addEventListener('click', () => {
     const enteredOtp = document.getElementById('otpInput').value.trim();
     if (!currentOtp) {
         document.getElementById('status').textContent = "No OTP generated";
@@ -140,9 +158,10 @@ document.getElementById('verifyBtn').addEventListener('click', () => {
         return;
     }
     if (enteredOtp === currentOtp) {
-        document.getElementById('status').textContent = "OTP verified!";
+        document.getElementById('status').textContent = "OTP verified! You can download now.";
         document.getElementById('status').className = 'success';
         document.getElementById('downloadBtn').disabled = false;
+        accessGranted = true;
     } else {
         document.getElementById('status').textContent = "Invalid OTP";
         document.getElementById('status').className = 'error';
@@ -153,6 +172,10 @@ document.getElementById('downloadBtn').addEventListener('click', () => {
     const gameId = document.getElementById('gameId').value.trim();
     if (!gameId) {
         alert("Enter Game ID!");
+        return;
+    }
+    if (!accessGranted) {
+        alert("You must verify Secret Code or OTP first!");
         return;
     }
     window.location.href = `https://codeload.github.com/SteamAutoCracks/ManifestHub/zip/refs/heads/${gameId}`;
