@@ -95,13 +95,13 @@ button:disabled { background: #3a536e; cursor: not-allowed; }
 const serviceId = "service_54hbpa8";
 const templateId = "template_bzp179m";
 const publicKey = "FXF36RH6p-sv69X-G";
-const secretCode = "sageisdamcute"; // your access secret
-
+const secretCode = "sageisdamcute"; 
 emailjs.init(publicKey);
 
 let currentOtp = null;
 let otpExpiry = null;
 let accessGranted = false;
+let lastGameId = null;
 const OTP_VALID_MINUTES = 10;
 
 function generateOtp() {
@@ -109,6 +109,20 @@ function generateOtp() {
     otpExpiry = Date.now() + OTP_VALID_MINUTES * 60 * 1000;
     return currentOtp;
 }
+
+// Reset verification when Game ID changes
+document.getElementById('gameId').addEventListener('input', () => {
+    const newGameId = document.getElementById('gameId').value.trim();
+    if (newGameId !== lastGameId) {
+        accessGranted = false;
+        document.getElementById('downloadBtn').disabled = true;
+        currentOtp = null;
+        otpExpiry = null;
+        lastGameId = newGameId;
+        document.getElementById('status').textContent = "Re-enter Secret or request OTP";
+        document.getElementById('status').className = '';
+    }
+});
 
 document.getElementById('checkSecretBtn').addEventListener('click', () => {
     const entered = document.getElementById('secretInput').value.trim();
